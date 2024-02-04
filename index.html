@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>HawkAi 3.0</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #000; /* Changed to black */
+            overscroll-behavior: none;
+        }
+
+        .reticle-container {
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: transparent;
+            opacity: 0.9;
+        }
+
+        .reticle {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 24px;
+            color: #fff; /* Set the color to white */
+            background: transparent;
+        }
+
+        .arc {
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 50%;
+            clip-path: inset(20% 50% 20% 0);
+            background: transparent;
+        }
+
+        .arc.left {
+            border: 100px solid blue;
+            background: transparent;
+        }
+
+        .arc.right {
+            border: 100px solid red;
+            transform: rotate(180deg);
+            background: transparent;
+        }
+
+        /* Make the globe interactive */
+        #renderContainer { 
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 600px;
+            height: 600px;
+            cursor: pointer;
+        }
+
+        .menu-item {
+            position: absolute;
+            text-decoration: none;
+            color: #fff; /* Changed to white */
+            font-size: 16px;
+            transform-origin: center;
+            white-space: nowrap;
+            background: transparent;
+            cursor: pointer;
+        }
+
+        /* Adjusted positioning of the menu items */
+        .menu-item:nth-child(1) { top: 30%; left: -22%; transform: rotate(0deg); }
+        .menu-item:nth-child(2) { top: 50%; left: -24%; transform: rotate(0deg); }
+        .menu-item:nth-child(3) { top: 70%; left: -22%; transform: rotate(0deg); }
+
+        .menu-item:nth-child(4) { top: 30%; right: -22%; transform: rotate(0deg); }
+        .menu-item:nth-child(5) { top: 50%; right: -24%; transform: rotate(0deg); }
+        .menu-item:nth-child(6) { top: 70%; right: -22%; transform: rotate(0deg); }
+
+        /* Make the globe interactive */
+        #renderContainer .menu-item { pointer-events: none; }
+        #renderContainer { pointer-events: auto; }
+    </style>
+</head>
+<body>
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@latest/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@latest/examples/jsm/"
+            }
+        }
+    </script>
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+        let camera, scene, renderer, globe, controls;
+
+        init();
+        animate();
+
+        function init() {
+            const container = document.getElementById('renderContainer');
+
+            camera = new THREE.PerspectiveCamera(60, 1, 0.5, 50);
+            camera.position.set(0, 0, 15);
+
+            scene = new THREE.Scene();
+
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+            scene.add(ambientLight);
+
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+            directionalLight.position.set(0, 1, 0);
+            scene.add(directionalLight);
+
+            // Load the earth texture
+            const textureLoader = new THREE.TextureLoader();
+            const earthTexture = textureLoader.load('https://unpkg.com/three-globe@2.30.0/example/img/earth-blue-marble.jpg');
+
+            // Create SphereGeometry for the globe
+            const geometry = new THREE.SphereGeometry(5, 32, 32);
+            const material = new THREE.MeshBasicMaterial({ map: earthTexture, transparent: true });
+            globe = new THREE.Mesh(geometry, material);
+            scene.add(globe);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.setSize(600, 600);
+            container.appendChild(renderer.domElement);
+
+            controls = new OrbitControls(camera, renderer.domElement);
+            controls.minDistance = 5;
+            controls.maxDistance = 50;
+            controls.update();
+
+            window.addEventListener('resize', onWindowResize);
+        }
+
+        function onWindowResize() {
+            const container = document.getElementById('renderContainer');
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+
+            camera.aspect = width / height;
+            camera.updateProjectionMatrix();
+            renderer.setSize(width, height);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            render();
+        }
+
+        function render() {
+            renderer.render(scene, camera);
+        }
+    </script>
+
+    <div class="reticle-container">
+        <div class="arc left"></div>
+        <div class="arc right"></div>
+    </div>
+
+    <div id="renderContainer"></div> <!-- Container for the renderer -->
+
+    <div class="menu">
+        <a href="#" class="menu-item">Globe</a>
+        <a href="#" class="menu-item">Terrain</a>
+        <a href="#" class="menu-item">Reset View</a>
+        <a href="#" class="menu-item">Alert</a>
+        <a href="#" class="menu-item">Chat</a>
+        <a href="#" class="menu-item">Settings</a>
+    </div>
+</body>
+</html>
