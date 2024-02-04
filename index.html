@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -15,13 +16,20 @@
             overscroll-behavior: none;
         }
 
+        #renderContainer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 10%;
+            height: 10%;
+            background: transparent;
+            cursor: pointer;
+        }
+
         .reticle-container {
             position: absolute;
             width: 600px;
             height: 600px;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
             background: transparent;
             opacity: 0.9;
         }
@@ -40,34 +48,25 @@
             position: absolute;
             width: 600px;
             height: 600px;
-            top: 0;
-            left: 50%;
-            transform: translateX(-50%);
+            top: 50%;
+            transform-origin: 50% 50%;
+            transform: translateY(-50%);
             border-radius: 50%;
-            clip-path: inset(20% 50% 20% 0);
+            clip-path: inset(20% 50% 20% 0); /* Adjusted to move arcs away from center */
             background: transparent;
         }
 
         .arc.left {
+            left: -30%;
             border: 100px solid blue;
             background: transparent;
         }
 
         .arc.right {
+            right: -30%;
             border: 100px solid red;
-            transform: rotate(180deg);
+            transform: translateY(-50%) rotate(180deg);
             background: transparent;
-        }
-
-        /* Make the globe interactive */
-        #renderContainer { 
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 600px;
-            height: 600px;
-            cursor: pointer;
         }
 
         .menu-item {
@@ -89,21 +88,21 @@
         .menu-item:nth-child(4) { top: 30%; right: -22%; transform: rotate(0deg); }
         .menu-item:nth-child(5) { top: 50%; right: -24%; transform: rotate(0deg); }
         .menu-item:nth-child(6) { top: 70%; right: -22%; transform: rotate(0deg); }
-
+        
         /* Make the globe interactive */
-        #renderContainer .menu-item { pointer-events: none; }
+        #renderContainer .menu-item { pointer-events: auto; }
         #renderContainer { pointer-events: auto; }
     </style>
 </head>
 <body>
     <script type="importmap">
-        {
-            "imports": {
-                "three": "https://unpkg.com/three@latest/build/three.module.js",
-                "three/addons/": "https://unpkg.com/three@latest/examples/jsm/"
-            }
-        }
-    </script>
+			{
+				"imports": {
+					"three": "https://unpkg.com/three@latest/build/three.module.js",
+                    "three/addons/": "https://unpkg.com/three@latest/examples/jsm/"
+				}
+			}
+	</script>
     <script type="module">
         import * as THREE from 'three';
         import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
@@ -116,7 +115,7 @@
         function init() {
             const container = document.getElementById('renderContainer');
 
-            camera = new THREE.PerspectiveCamera(60, 1, 0.5, 50);
+            camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.5, 50);
             camera.position.set(0, 0, 15);
 
             scene = new THREE.Scene();
@@ -140,7 +139,7 @@
 
             renderer = new THREE.WebGLRenderer({ antialias: true });
             renderer.setPixelRatio(window.devicePixelRatio);
-            renderer.setSize(600, 600);
+            renderer.setSize(window.innerWidth, window.innerHeight);
             container.appendChild(renderer.domElement);
 
             controls = new OrbitControls(camera, renderer.domElement);
@@ -152,13 +151,9 @@
         }
 
         function onWindowResize() {
-            const container = document.getElementById('renderContainer');
-            const width = container.clientWidth;
-            const height = container.clientHeight;
-
-            camera.aspect = width / height;
+            camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
-            renderer.setSize(width, height);
+            renderer.setSize(window.innerWidth, window.innerHeight);
         }
 
         function animate() {
@@ -171,28 +166,21 @@
             renderer.render(scene, camera);
         }
     </script>
-    <script type=''javascript>
-        function onClick() {
-            //when you click the button change the attribute of the map / what ever else you need with this
-            setAttribute() {
-                
-            }
-        }
-    </script>
-    <div class="reticle-container">
-        <div class="arc left"></div>
-        <div class="arc right"></div>
-    </div>
 
     <div id="renderContainer"></div> <!-- Container for the renderer -->
 
-    <div class="menu">
-        <a href="#" class="menu-item">Globe</a>
-        <a href="#" class="menu-item">Terrain</a>
-        <a href="#" class="menu-item">Reset View</a>
-        <a href="#" class="menu-item">Alert</a>
-        <a href="#" class="menu-item">Chat</a>
-        <a href="#" class="menu-item">Settings</a>
+    <div class="reticle-container">
+        <div class="arc left"></div>
+        <div class="arc right"></div>
+        <!-- <div class="reticle">+</div> -->
+        <div class="menu">
+            <a href="#" class="menu-item">Globe</a>
+            <a href="#" class="menu-item">Terrain</a>
+            <a href="#" class="menu-item">Reset View</a>
+            <a href="#" class="menu-item">Alert</a>
+            <a href="#" class="menu-item">Chat</a>
+            <a href="#" class="menu-item">Settings</a>
+        </div>
     </div>
 </body>
 </html>
